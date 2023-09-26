@@ -104,25 +104,50 @@ const Vacations = ({ vacations, places, cancelVacation, users })=> {
   );
 };
 
-const Places = ({ places, vacations })=> {
+const Places = ({ places, vacations }) => {
+  const maxVacationsForPlace = Math.max(
+    ...places.map(place =>
+      vacations.filter(vacation => vacation.place_id === place.id).length
+    )
+  )
+  const highlightedPlaces = places
+    .filter(place =>
+      vacations.filter(vacation => vacation.place_id === place.id).length === maxVacationsForPlace
+    )
+    .map(place => place.name)
+
   return (
     <div>
-      <h2>Places ({ places.length })</h2>
+      <h2>Places ({places.length})</h2>
       <ul>
-        {
-          places.map( place => {
-            return (
-              <li key={ place.id }>
-                { place.name }
-                ({ vacations.filter(vacation => vacation.place_id === place.id).length })
-              </li>
-            );
-          })
-        }
+        {places.map(place => {
+          const numVacations = vacations.filter(
+            vacation => vacation.place_id === place.id
+          ).length
+
+          const isMax = numVacations === maxVacationsForPlace
+
+          return (
+            <li
+              key={place.id}
+              style={{ fontWeight: isMax ? 'bold' : 'normal' }}
+            >
+              {place.name} ({numVacations})
+            </li>
+          )
+        })}
+      </ul>
+
+      <h3>Most Popular Place(s):</h3>
+      <ul>
+        {highlightedPlaces.map(placeName => (
+          <li key={placeName}>{placeName}</li>
+        ))}
       </ul>
     </div>
-  );
-};
+  )
+}
+
 
 const App = ()=> {
   const [users, setUsers] = useState([]);

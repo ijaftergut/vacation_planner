@@ -62,9 +62,9 @@ app.get('/api/vacations', async(req, res, next)=> {
 app.post('/api/vacations', async(req, res, next)=> {
   try{
     const SQL = `
-      INSERT INTO vacations(user_id, place_id) VALUES($1, $2) RETURNING *
+      INSERT INTO vacations(user_id, place_id, note) VALUES($1, $2, $3) RETURNING *
     `;
-    const response = await client.query(SQL, [ req.body.user_id, req.body.place_id ]);
+    const response = await client.query(SQL, [ req.body.user_id, req.body.place_id, req.body.note ]);
     res.send(response.rows[0]);
   }
   catch(ex){
@@ -104,7 +104,9 @@ const init = async()=> {
       id SERIAL PRIMARY KEY,
       place_id INTEGER REFERENCES places(id) NOT NULL,
       user_id INTEGER REFERENCES users(id) NOT NULL,
+      note VARCHAR(255),
       created_at TIMESTAMP DEFAULT now()
+
     );
     INSERT INTO users(name) VALUES ('moe');
     INSERT INTO users(name) VALUES ('larry');
@@ -116,15 +118,16 @@ const init = async()=> {
     INSERT INTO places(name) VALUES ('COSTA RICA');
     INSERT INTO places(name) VALUES ('DALLAS');
     INSERT INTO places(name) VALUES ('MOUNT VERNON');
-    INSERT INTO vacations(user_id, place_id) VALUES (
+    INSERT INTO vacations(user_id, place_id, note) VALUES (
       (SELECT id FROM users WHERE name='lucy'),
-      (SELECT id FROM places WHERE name='ICELAND')
+      (SELECT id FROM places WHERE name='ICELAND'),
+      'hello world'
     );
   `;
   await client.query(SQL);
   console.log('create your tables and seed data');
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 4000;
   app.listen(port, ()=> {
     console.log(`listening on port ${port}`);
   });
